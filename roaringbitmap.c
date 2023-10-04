@@ -2056,7 +2056,7 @@ rb_cardinality_final(PG_FUNCTION_ARGS) {
 
 //bitmap run optimize
 PG_FUNCTION_INFO_V1(rb_runoptimize);
-Datum rb_runoptimize(rb_runoptimize);
+Datum rb_runoptimize(PG_FUNCTION_ARGS);
 
 Datum
 rb_runoptimize(PG_FUNCTION_ARGS) {
