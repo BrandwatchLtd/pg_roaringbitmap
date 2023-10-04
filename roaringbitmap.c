@@ -2063,6 +2063,7 @@ rb_runoptimize(PG_FUNCTION_ARGS) {
     bytea *serializedbytes = PG_GETARG_BYTEA_P(0);
     roaring_bitmap_t *r;
     bool optimized;
+    size_t expectedsize;
 
     r = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
     if (!r)
