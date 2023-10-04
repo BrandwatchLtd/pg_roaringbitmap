@@ -2055,11 +2055,11 @@ rb_cardinality_final(PG_FUNCTION_ARGS) {
 }
 
 //bitmap run optimize
-PG_FUNCTION_INFO_V1(rb_or);
-Datum rb_or(rb_runoptimize);
+PG_FUNCTION_INFO_V1(rb_runoptimize);
+Datum rb_runoptimize(rb_runoptimize);
 
 Datum
-rb_or(PG_FUNCTION_ARGS) {
+rb_runoptimize(PG_FUNCTION_ARGS) {
     bytea *serializedbytes = PG_GETARG_BYTEA_P(0);
     roaring_bitmap_t *r;
     bool optimized;
