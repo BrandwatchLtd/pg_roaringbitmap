@@ -23,7 +23,19 @@ static const struct config_enum_entry output_format_options[] =
 
 static int	rbitmap_output_format;		/* output format */
 
+void *		pg_aligned_malloc(size_t alignment, size_t size);
+void		pg_aligned_free(void *memblock);
 void		_PG_init(void);
+
+static roaring_memory_t pg_global_memory_hook = {
+        .malloc = palloc,
+        .realloc = repalloc,
+        .calloc = palloc0,
+        .free = pfree,
+        .aligned_malloc = pg_aligned_malloc,
+        .aligned_free = pg_aligned_free,
+};
+
 /*
  * Module load callback
  */
@@ -42,8 +54,30 @@ _PG_init(void)
 							 NULL,
 							 NULL,
 							 NULL);
+    roaring_init_memory_hook(pg_global_memory_hook);
 }
 
+void *
+pg_aligned_malloc(size_t alignment, size_t size) {
+    void *p;
+    void *porg;
+    assert(alignment <= 256);
+    porg = palloc(size + alignment);
+    p = (void *)((((uint64)porg + alignment) / alignment) * alignment);
+    *((unsigned char *)p-1) = (unsigned char)((uint64)p - (uint64)porg);
+    return p;
+}
+
+void
+pg_aligned_free(void *memblock) {
+    void *porg;
+    if (memblock == NULL)
+        return;
+    porg = (void *)((uint64)memblock - *((unsigned char *)memblock-1));
+    if (porg == memblock)
+        porg = (void *)((uint64)porg - 256);
+    pfree(porg);
+}
 
 bool
 ArrayContainsNulls(ArrayType *array) {
