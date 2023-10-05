@@ -23,7 +23,6 @@
 #include "libpq/pqformat.h"
 
 /* must include "roaring.h" before redefine malloc functions */
-#define CROARING_ATOMIC_IMPL 3
 #include "roaring.h"
 
 #ifdef PG_MODULE_MAGIC
