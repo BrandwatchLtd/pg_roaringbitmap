@@ -25,13 +25,16 @@ static int	rbitmap_output_format;		/* output format */
 
 void *		pg_aligned_malloc(size_t alignment, size_t size);
 void		pg_aligned_free(void *memblock);
+void*		pg_realloc(void* p, size_t new_sz);
+void*		pg_calloc(size_t n_elements, size_t element_size);
+void        pg_free(void* p);
 void		_PG_init(void);
 
 static roaring_memory_t pg_global_memory_hook = {
         .malloc = palloc,
-        .realloc = repalloc,
-        .calloc = palloc0,
-        .free = pfree,
+        .realloc = pg_realloc,
+        .calloc = pg_calloc,
+        .free = pg_free,
         .aligned_malloc = pg_aligned_malloc,
         .aligned_free = pg_aligned_free,
 };
@@ -77,6 +80,21 @@ pg_aligned_free(void *memblock) {
     if (porg == memblock)
         porg = (void *)((uint64)porg - 256);
     pfree(porg);
+}
+
+void*
+pg_realloc(void* p, size_t new_sz) {
+    return p==NULL ? palloc(new_sz) : repalloc(p,new_sz);
+}
+
+void*
+pg_calloc(size_t n_elements, size_t element_size) {
+    return palloc0(n_elements*element_size);
+}
+
+void
+pg_free(void* p) {
+    return p==NULL ? free(p) : pfree(p);
 }
 
 bool
