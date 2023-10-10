@@ -142,7 +142,7 @@ rb_from_bytea(PG_FUNCTION_ARGS) {
     bytea *serializedbytes = PG_GETARG_BYTEA_P(0);
     roaring_bitmap_t *r1;
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -261,9 +261,9 @@ roaringbitmap_in(PG_FUNCTION_ARGS) {
              errmsg("malformed bitmap literal")));
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -280,17 +280,22 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
     roaring_uint32_iterator_t iterator;
     StringInfoData buf;
     roaring_bitmap_t *r1;
-    
-    if(rbitmap_output_format == RBITMAP_OUTPUT_BYTEA){
-        return DirectFunctionCall1(byteaout, PG_GETARG_DATUM(0));
-    }
-    
+    size_t expectedsize;
+
     serializedbytes = PG_GETARG_BYTEA_P(0);
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
+
+    if(rbitmap_output_format == RBITMAP_OUTPUT_BYTEA){
+        expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+        serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+        roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+        roaring_bitmap_free(r1);
+        return DirectFunctionCall1(byteaout, PointerGetDatum(serializedbytes));
+    }
 
     initStringInfo(&buf);
 
@@ -309,6 +314,7 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
 
     appendStringInfoChar(&buf, '}');
 
+    roaring_bitmap_free(r1);
     PG_RETURN_CSTRING(buf.data);
 }
 
@@ -350,13 +356,13 @@ rb_or(PG_FUNCTION_ARGS) {
     size_t expectedsize;
     bytea *serializedbytes;
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes2));
+    r2 = roaring_bitmap_deserialize(VARDATA(serializedbytes2));
     if (!r2) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
@@ -365,9 +371,9 @@ rb_or(PG_FUNCTION_ARGS) {
     }
     roaring_bitmap_or_inplace(r1, r2);
     roaring_bitmap_free(r2);
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -454,9 +460,9 @@ rb_and(PG_FUNCTION_ARGS) {
                  errmsg("bitmap format is error")));
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r);
+    expectedsize = roaring_bitmap_size_in_bytes(r);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r, VARDATA(serializedbytes));
     roaring_bitmap_free(r);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -544,9 +550,9 @@ rb_andnot(PG_FUNCTION_ARGS) {
                  errmsg("bitmap format is error")));
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r);
+    expectedsize = roaring_bitmap_size_in_bytes(r);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r, VARDATA(serializedbytes));
     roaring_bitmap_free(r);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -608,13 +614,13 @@ rb_xor(PG_FUNCTION_ARGS) {
     size_t expectedsize;
     bytea *serializedbytes;
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes2));
+    r2 = roaring_bitmap_deserialize(VARDATA(serializedbytes2));
     if (!r2) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
@@ -624,9 +630,9 @@ rb_xor(PG_FUNCTION_ARGS) {
 
     roaring_bitmap_xor_inplace(r1, r2);
     roaring_bitmap_free(r2);
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1002,7 +1008,7 @@ rb_add(PG_FUNCTION_ARGS) {
     size_t expectedsize;
     bytea *serializedbytes;
 
-    roaring_bitmap_t *r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    roaring_bitmap_t *r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1010,9 +1016,9 @@ rb_add(PG_FUNCTION_ARGS) {
 
     roaring_bitmap_add(r1, value);
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1030,7 +1036,7 @@ rb_remove(PG_FUNCTION_ARGS) {
     size_t expectedsize;
     bytea *serializedbytes;
 
-    roaring_bitmap_t *r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    roaring_bitmap_t *r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1038,9 +1044,9 @@ rb_remove(PG_FUNCTION_ARGS) {
 
     roaring_bitmap_remove(r1, value);
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1212,7 +1218,7 @@ rb_fill(PG_FUNCTION_ARGS) {
         rangeend = MAX_BITMAP_RANGE_END;
     }
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1230,9 +1236,9 @@ rb_fill(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r2);
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1261,7 +1267,7 @@ rb_clear(PG_FUNCTION_ARGS) {
         rangeend = MAX_BITMAP_RANGE_END;
     }
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1280,9 +1286,9 @@ rb_clear(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r2);
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1310,7 +1316,7 @@ rb_flip(PG_FUNCTION_ARGS) {
         rangeend = MAX_BITMAP_RANGE_END;
     }
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1320,9 +1326,9 @@ rb_flip(PG_FUNCTION_ARGS) {
         roaring_bitmap_flip_inplace(r1, rangestart, rangeend);
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1344,7 +1350,7 @@ rb_shiftright(PG_FUNCTION_ARGS) {
     size_t expectedsize;
     bytea *serializedbytes;
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1383,9 +1389,9 @@ rb_shiftright(PG_FUNCTION_ARGS) {
         r1 = r2;
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1415,12 +1421,12 @@ rb_range(PG_FUNCTION_ARGS) {
         rangeend = MAX_BITMAP_RANGE_END;
     }
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
-    
+
     r2 = roaring_bitmap_create();
     if (!r2) {
         roaring_bitmap_free(r1);
@@ -1438,9 +1444,9 @@ rb_range(PG_FUNCTION_ARGS) {
         roaring_advance_uint32_iterator(&iterator);
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r2);
+    expectedsize = roaring_bitmap_size_in_bytes(r2);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r2, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
     roaring_bitmap_free(r2);
 
@@ -1469,7 +1475,7 @@ rb_range_cardinality(PG_FUNCTION_ARGS) {
         rangeend = MAX_BITMAP_RANGE_END;
     }
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1517,7 +1523,7 @@ rb_select(PG_FUNCTION_ARGS) {
         rangeend = MAX_BITMAP_RANGE_END;
     }
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes1));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1575,9 +1581,9 @@ rb_select(PG_FUNCTION_ARGS) {
         }
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r2);
+    expectedsize = roaring_bitmap_size_in_bytes(r2);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r2, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
     roaring_bitmap_free(r2);
 
@@ -1609,10 +1615,10 @@ rb_build(PG_FUNCTION_ARGS) {
         roaring_bitmap_add(r1, da[n]);
     }
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+    expectedsize = roaring_bitmap_size_in_bytes(r1);
 
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -1634,7 +1640,7 @@ rb_to_array(PG_FUNCTION_ARGS)
     uint64_t card1;
     uint32_t counter = 0;
 
-    r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
+    r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1686,7 +1692,7 @@ rb_iterate(PG_FUNCTION_ARGS) {
 
         oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
-        r1 = roaring_bitmap_portable_deserialize(VARDATA(data));
+        r1 = roaring_bitmap_deserialize(VARDATA(data));
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1742,7 +1748,7 @@ rb_or_trans(PG_FUNCTION_ARGS) {
 
         oldcontext = MemoryContextSwitchTo(aggctx);
 
-        r2 = roaring_bitmap_portable_deserialize(VARDATA(bb));
+        r2 = roaring_bitmap_deserialize(VARDATA(bb));
 
         if (PG_ARGISNULL(0)) {
             r1 = r2;
@@ -1827,14 +1833,14 @@ rb_and_trans(PG_FUNCTION_ARGS) {
             bb = PG_GETARG_BYTEA_P(1);
 
             oldcontext = MemoryContextSwitchTo(aggctx);
-            r2 = roaring_bitmap_portable_deserialize(VARDATA(bb));
+            r2 = roaring_bitmap_deserialize(VARDATA(bb));
             MemoryContextSwitchTo(oldcontext);
             r1 = r2;
         } else {
             r1 = (roaring_bitmap_t *) PG_GETARG_POINTER(0);
             if (!roaring_bitmap_is_empty(r1)) {
                 bb = PG_GETARG_BYTEA_P(1);
-                r2 = roaring_bitmap_portable_deserialize(VARDATA(bb));
+                r2 = roaring_bitmap_deserialize(VARDATA(bb));
 
                 oldcontext = MemoryContextSwitchTo(aggctx);
                 roaring_bitmap_and_inplace(r1, r2);
@@ -1916,7 +1922,7 @@ rb_xor_trans(PG_FUNCTION_ARGS) {
 
         oldcontext = MemoryContextSwitchTo(aggctx);
 
-        r2 = roaring_bitmap_portable_deserialize(VARDATA(bb));
+        r2 = roaring_bitmap_deserialize(VARDATA(bb));
 
         if (PG_ARGISNULL(0)) {
             r1 = r2;
@@ -2036,9 +2042,9 @@ rb_serialize(PG_FUNCTION_ARGS) {
     } else {
         r1 = (roaring_bitmap_t *) PG_GETARG_POINTER(0);
 
-        expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
+        expectedsize = roaring_bitmap_size_in_bytes(r1);
         serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-        roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
+        roaring_bitmap_serialize(r1, VARDATA(serializedbytes));
 
         SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
         PG_RETURN_BYTEA_P(serializedbytes);
@@ -2066,7 +2072,7 @@ rb_deserialize(PG_FUNCTION_ARGS) {
         PG_RETURN_NULL();
     } else {
         serializedbytes = PG_GETARG_BYTEA_P(0);
-        r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
+        r1 = roaring_bitmap_deserialize(VARDATA(serializedbytes));
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -2116,7 +2122,7 @@ rb_runoptimize(PG_FUNCTION_ARGS) {
     roaring_bitmap_t *r;
     size_t expectedsize;
 
-    r = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
+    r = roaring_bitmap_deserialize(VARDATA(serializedbytes));
     if (!r)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -2124,9 +2130,9 @@ rb_runoptimize(PG_FUNCTION_ARGS) {
 
     roaring_bitmap_run_optimize(r);
 
-    expectedsize = roaring_bitmap_portable_size_in_bytes(r);
+    expectedsize = roaring_bitmap_size_in_bytes(r);
     serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-    roaring_bitmap_portable_serialize(r, VARDATA(serializedbytes));
+    roaring_bitmap_serialize(r, VARDATA(serializedbytes));
 
     roaring_bitmap_free(r);
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
