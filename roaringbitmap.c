@@ -177,88 +177,86 @@ roaringbitmap_in(PG_FUNCTION_ARGS) {
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                      errmsg("bitmap format is error")));
+    } else {
+        /* int array input */
 
-        roaring_bitmap_free(r1);
-        return dd;
-    }
-    /* else int array input */
-
-	/* Find the head char '{' */
-    while (*ptr && isspace((unsigned char) *ptr))
+        /* Find the head char '{' */
+        while (*ptr && isspace((unsigned char) *ptr))
             ptr++;
-    if (*ptr !='{')
-        ereport(ERROR,
-            (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-             errmsg("malformed bitmap literal")));
-    ptr++;
-
-    r1 = roaring_bitmap_create();
-
-    while (*ptr && isspace((unsigned char) *ptr))
+        if (*ptr != '{')
+            ereport(ERROR,
+                    (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+                            errmsg("malformed bitmap literal")));
         ptr++;
 
-    if (*ptr != '}') {
-        while (*ptr) {
-            /* Parse int element */
-            errno = 0;
-            l = strtol(ptr, &badp, 10);
+        r1 = roaring_bitmap_create();
 
-            /* We made no progress parsing the string, so bail out */
-            if (ptr == badp){
-                roaring_bitmap_free(r1);
-                ereport(ERROR,
-                    (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
-                     errmsg("invalid input syntax for %s: \"%s\"",
-                            "integer", ptr)));
-            }
+        while (*ptr && isspace((unsigned char) *ptr))
+            ptr++;
 
-            if (errno == ERANGE
-                || l < INT4_MIN || l > INT4_MAX
-                ){
+        if (*ptr != '}') {
+            while (*ptr) {
+                /* Parse int element */
+                errno = 0;
+                l = strtol(ptr, &badp, 10);
+
+                /* We made no progress parsing the string, so bail out */
+                if (ptr == badp) {
+                    roaring_bitmap_free(r1);
+                    ereport(ERROR,
+                            (errcode(ERRCODE_INVALID_TEXT_REPRESENTATION),
+                                    errmsg("invalid input syntax for %s: \"%s\"",
+                                           "integer", ptr)));
+                }
+
+                if (errno == ERANGE
+                    || l < INT4_MIN || l > INT4_MAX
+                        ) {
                     roaring_bitmap_free(r1);
                     ereport(ERROR,
                             (errcode(ERRCODE_NUMERIC_VALUE_OUT_OF_RANGE),
-                             errmsg("value \"%s\" is out of range for type %s", ptr,
-                                    "integer")));
+                                    errmsg("value \"%s\" is out of range for type %s", ptr,
+                                           "integer")));
                 }
 
-            /* Add int element to bitmap */
-            roaring_bitmap_add(r1, l);
+                /* Add int element to bitmap */
+                roaring_bitmap_add(r1, l);
 
-            /* Skip any trailing whitespace after the int element */
-            ptr = badp;
-            while (*ptr && isspace((unsigned char) *ptr))
+                /* Skip any trailing whitespace after the int element */
+                ptr = badp;
+                while (*ptr && isspace((unsigned char) *ptr))
+                    ptr++;
+
+                /* Find the element terminator ',' */
+                if (*ptr != ',')
+                    break;
                 ptr++;
 
-            /* Find the element terminator ',' */
-            if (*ptr != ',')
-                break;
-            ptr++;
+                /* Skip any trailing whitespace after the terminator */
+                while (*ptr && isspace((unsigned char) *ptr))
+                    ptr++;
+            }
 
-            /* Skip any trailing whitespace after the terminator */
-            while (*ptr && isspace((unsigned char) *ptr))
-                ptr++;
+            /* Find the tail char '{' */
+            if (*ptr != '}') {
+                roaring_bitmap_free(r1);
+                ereport(ERROR,
+                        (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+                                errmsg("malformed bitmap literal")));
+            }
         }
 
-        /* Find the tail char '{' */
-        if (*ptr !='}'){
+        /* Check if input end */
+        ptr++;
+        while (*ptr && isspace((unsigned char) *ptr))
+            ptr++;
+
+        if (*ptr != '\0') {
             roaring_bitmap_free(r1);
             ereport(ERROR,
                     (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-                     errmsg("malformed bitmap literal")));
+                            errmsg("malformed bitmap literal")));
         }
-    }
-
-    /* Check if input end */
-    ptr++;
-    while (*ptr && isspace((unsigned char) *ptr))
-        ptr++;
-
-    if (*ptr !='\0'){
-        roaring_bitmap_free(r1);
-        ereport(ERROR,
-            (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-             errmsg("malformed bitmap literal")));
     }
 
     expectedsize = roaring_bitmap_size_in_bytes(r1);
