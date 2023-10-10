@@ -1,7 +1,7 @@
 # pg_roaringbitmap
 RoaringBitmap extension for PostgreSQL.
 
-It's initial based on https://github.com/zeromax007/gpdb-roaringbitmap
+It's initially based on https://github.com/zeromax007/gpdb-roaringbitmap
 and later forked from https://github.com/ChenHuajun/pg_roaringbitmap
 
 # Introduction
