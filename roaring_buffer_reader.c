@@ -239,7 +239,7 @@ static bool rb_append_copy_range(roaring_array_t *ra, const roaring_buffer_t *rb
 
 
 /**
- * Creates a new roaring buffer (from a partable serialized roaringbitmap buffer).
+ * Creates a new roaring buffer (from a serialized roaringbitmap buffer).
  * Returns NULL if error occurred.
  */
 roaring_buffer_t *roaring_buffer_create(const char *buf, size_t buf_len){
@@ -612,7 +612,7 @@ roaring_bitmap_t *roaring_buffer_andnot(const roaring_buffer_t *x1,
         return empty_bitmap;
     }
     if (0 == length2) {
-        return roaring_bitmap_portable_deserialize(x1->buf);
+        return roaring_bitmap_deserialize(x1->buf);
     }
     roaring_bitmap_t *answer = roaring_bitmap_create_with_capacity(length1);
     if(answer == NULL)
