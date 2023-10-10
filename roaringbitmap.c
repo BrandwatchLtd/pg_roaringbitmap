@@ -292,6 +292,7 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
         serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
         roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
         roaring_bitmap_free(r1);
+        SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
         return DirectFunctionCall1(byteaout, PointerGetDatum(serializedbytes));
     }
 
