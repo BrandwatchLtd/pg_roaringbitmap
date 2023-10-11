@@ -47,6 +47,5 @@ bool ArrayContainsNulls(ArrayType *array);
 #define ARRISEMPTY(x)  (ARRNELEMS(x) == 0)
 
 #include "roaring.c"
-#include "roaring_buffer_reader.c"
 
 #endif
