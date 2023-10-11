@@ -675,7 +675,7 @@ rb_cardinality(PG_FUNCTION_ARGS) {
     uint64 card;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -699,7 +699,7 @@ rb_is_empty(PG_FUNCTION_ARGS) {
     bool isempty;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -723,7 +723,7 @@ rb_exsit(PG_FUNCTION_ARGS) {
     bool isexsit;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1020,7 +1020,7 @@ rb_min(PG_FUNCTION_ARGS) {
     uint32 min;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1050,7 +1050,7 @@ rb_max(PG_FUNCTION_ARGS) {
     uint32 max;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1080,7 +1080,7 @@ rb_rank(PG_FUNCTION_ARGS) {
     uint64 rank;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1106,7 +1106,7 @@ rb_index(PG_FUNCTION_ARGS) {
     bool isexsit;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
-                               VARSIZE(data));
+                               VARSIZE(data) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -1634,7 +1634,7 @@ rb_iterate(PG_FUNCTION_ARGS) {
 
         oldcontext = MemoryContextSwitchTo(funcctx->multi_call_memory_ctx);
 
-        r1 = roaring_bitmap_frozen_view(VARDATA(data), VARSIZE(data));
+        r1 = roaring_bitmap_frozen_view(VARDATA(data), VARSIZE(data) - VARHDRSZ);
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
