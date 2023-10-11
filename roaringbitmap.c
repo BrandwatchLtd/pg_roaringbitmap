@@ -388,34 +388,30 @@ Datum
 rb_or_cardinality(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     uint64 card1;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_or_cardinality(r1, r2, &card1);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    card1 = roaring_bitmap_or_cardinality(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_INT64(card1);
 }
@@ -428,31 +424,31 @@ Datum
 rb_and(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     roaring_bitmap_t *r;
     size_t expectedsize;
     bytea *serializedbytes;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    r = roaring_buffer_and(r1, r2);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
+    r = roaring_bitmap_and(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
     if (!r) {
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -477,34 +473,30 @@ Datum
 rb_and_cardinality(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     uint64 card1;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_and_cardinality(r1, r2, &card1);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    card1 = roaring_bitmap_and_cardinality(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_INT64(card1);
 }
@@ -518,31 +510,31 @@ Datum
 rb_andnot(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     roaring_bitmap_t *r;
     size_t expectedsize;
     bytea *serializedbytes;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    r = roaring_buffer_andnot(r1, r2);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
+    r = roaring_bitmap_andnot(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
     if (!r) {
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
@@ -567,34 +559,30 @@ Datum
 rb_andnot_cardinality(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     uint64 card1;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_andnot_cardinality(r1, r2, &card1);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    card1 = roaring_bitmap_andnot_cardinality(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_INT64(card1);
 }
@@ -647,34 +635,30 @@ Datum
 rb_xor_cardinality(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     uint64 card1;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_xor_cardinality(r1, r2, &card1);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    card1 = roaring_bitmap_xor_cardinality(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_INT64(card1);
 }
@@ -687,18 +671,18 @@ Datum rb_cardinality(PG_FUNCTION_ARGS);
 Datum
 rb_cardinality(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     uint64 card;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    card = roaring_buffer_get_cardinality(r1);
-    roaring_buffer_free(r1);
+    card = roaring_bitmap_get_cardinality(r1);
+    roaring_bitmap_free(r1);
 
     PG_RETURN_INT64(card);
 }
@@ -711,18 +695,18 @@ Datum rb_is_empty(PG_FUNCTION_ARGS);
 Datum
 rb_is_empty(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     bool isempty;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    isempty = roaring_buffer_is_empty(r1);
-    roaring_buffer_free(r1);
+    isempty = roaring_bitmap_is_empty(r1);
+    roaring_bitmap_free(r1);
 
     PG_RETURN_INT64(isempty);
 }
@@ -735,23 +719,19 @@ Datum
 rb_exsit(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
     uint32 value = PG_GETARG_UINT32(1);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     bool isexsit;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    ret = roaring_buffer_contains(r1, value, &isexsit);
-    roaring_buffer_free(r1);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    isexsit = roaring_bitmap_contains(r1, value);
+    roaring_bitmap_free(r1);
 
     PG_RETURN_BOOL(isexsit);
 }
@@ -764,34 +744,30 @@ Datum
 rb_equals(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     bool isequal;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_equals(r1, r2, &isequal);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    isequal = roaring_bitmap_equals(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_BOOL(isequal);
 }
@@ -804,34 +780,30 @@ Datum
 rb_not_equals(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     bool isequal;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_equals(r1, r2, &isequal);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    isequal = roaring_bitmap_equals(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_BOOL(!isequal);
 }
@@ -844,34 +816,30 @@ Datum
 rb_intersect(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     bool isintersect;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_intersect(r1, r2, &isintersect);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    isintersect = roaring_bitmap_intersect(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_BOOL(isintersect);
 }
@@ -884,34 +852,30 @@ Datum
 rb_contains(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     bool iscontain;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_is_subset(r2, r1, &iscontain);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    iscontain = roaring_bitmap_is_subset(r2, r1);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_BOOL(iscontain);
 }
@@ -924,34 +888,30 @@ Datum
 rb_containedby(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     bool iscontained;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_is_subset(r1, r2, &iscontained);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    iscontained = roaring_bitmap_is_subset(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_BOOL(iscontained);
 }
@@ -964,34 +924,30 @@ Datum
 rb_jaccard_dist(PG_FUNCTION_ARGS) {
     bytea *serializedbytes1 = PG_GETARG_BYTEA_P(0);
     bytea *serializedbytes2 = PG_GETARG_BYTEA_P(1);
-    roaring_buffer_t *r1;
-    roaring_buffer_t *r2;
+    const roaring_bitmap_t *r1;
+    const roaring_bitmap_t *r2;
     double jaccard_dist;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(serializedbytes1),
+    r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    r2 = roaring_buffer_create(VARDATA(serializedbytes2),
+    r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2));
     if (!r2) {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
     }
 
-    ret = roaring_buffer_jaccard_index(r1, r2, &jaccard_dist);
-    roaring_buffer_free(r1);
-    roaring_buffer_free(r2);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    jaccard_dist = roaring_bitmap_jaccard_index(r1, r2);
+    roaring_bitmap_free(r1);
+    roaring_bitmap_free(r2);
 
     PG_RETURN_FLOAT8(jaccard_dist);
 }
@@ -1059,29 +1015,25 @@ Datum rb_min(PG_FUNCTION_ARGS);
 Datum
 rb_min(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     uint32 min;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    if(roaring_buffer_is_empty(r1))
+    if(roaring_bitmap_is_empty(r1))
     {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         PG_RETURN_NULL();
     }
 
-    ret = roaring_buffer_minimum(r1, &min);
-    roaring_buffer_free(r1);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    min = roaring_bitmap_minimum(r1);
+    roaring_bitmap_free(r1);
 
     PG_RETURN_UINT32(min);
 }
@@ -1094,29 +1046,25 @@ Datum rb_max(PG_FUNCTION_ARGS);
 Datum
 rb_max(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     uint32 max;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    if(roaring_buffer_is_empty(r1))
+    if(roaring_bitmap_is_empty(r1))
     {
-        roaring_buffer_free(r1);
+        roaring_bitmap_free(r1);
         PG_RETURN_NULL();
     }
 
-    ret = roaring_buffer_maximum(r1, &max);
-    roaring_buffer_free(r1);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    max = roaring_bitmap_maximum(r1);
+    roaring_bitmap_free(r1);
 
     PG_RETURN_UINT32(max);
 }
@@ -1129,23 +1077,19 @@ Datum
 rb_rank(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
     uint32 value = PG_GETARG_UINT32(1);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     uint64 rank;
     bool ret;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    ret = roaring_buffer_rank(r1, value, &rank);
-    roaring_buffer_free(r1);
-    if(!ret)
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+    rank = roaring_bitmap_rank(r1, value);
+    roaring_bitmap_free(r1);
 
     PG_RETURN_INT64((int64)rank);
 }
@@ -1158,36 +1102,25 @@ Datum
 rb_index(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
     uint32 value = PG_GETARG_UINT32(1);
-    roaring_buffer_t *r1;
+    const roaring_bitmap_t *r1;
     uint64 rank;
     int64 result;
     bool ret,isexsit;
 
-    r1 = roaring_buffer_create(VARDATA(data),
+    r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error")));
 
-    ret = roaring_buffer_contains(r1, value, &isexsit);
-    if(!ret)
-    {
-        roaring_buffer_free(r1);
-        ereport(ERROR,
-                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
-    }
+    isexsit = roaring_bitmap_contains(r1, value);
 
     result = -1;
     if(isexsit)
     {
-        ret = roaring_buffer_rank(r1, value, &rank);
-        roaring_buffer_free(r1);
-        if(!ret)
-            ereport(ERROR,
-                    (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                    errmsg("bitmap format is error")));
+        rank = roaring_bitmap_rank(r1, value);
+        roaring_bitmap_free(r1);
 
         result = (int64)rank - 1;
     }
