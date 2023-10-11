@@ -146,7 +146,7 @@ rb_from_bytea(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 1")));
 
     roaring_bitmap_free(r1);
     PG_RETURN_BYTEA_P(serializedbytes);
@@ -176,7 +176,7 @@ roaringbitmap_in(PG_FUNCTION_ARGS) {
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                     errmsg("bitmap format is error")));
+                     errmsg("bitmap format is error 2")));
     } else {
         /* int array input */
 
@@ -285,7 +285,7 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 3")));
 
     if(rbitmap_output_format == RBITMAP_OUTPUT_BYTEA){
         expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
@@ -360,14 +360,14 @@ rb_or(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 4")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2), VARSIZE(serializedbytes2) - VARHDRSZ);
     if (!r2) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 5")));
     }
     r3 = roaring_bitmap_or(r1, r2);
     roaring_bitmap_free(r1);
@@ -399,7 +399,7 @@ rb_or_cardinality(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 6")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -407,7 +407,7 @@ rb_or_cardinality(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 7")));
     }
 
     card1 = roaring_bitmap_or_cardinality(r1, r2);
@@ -436,7 +436,7 @@ rb_and(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 8")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -444,7 +444,7 @@ rb_and(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 9")));
     }
 
     r = roaring_bitmap_and(r1, r2);
@@ -453,7 +453,7 @@ rb_and(PG_FUNCTION_ARGS) {
     if (!r) {
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 10")));
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r);
@@ -483,7 +483,7 @@ rb_and_cardinality(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 11")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -491,7 +491,7 @@ rb_and_cardinality(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 12")));
     }
 
     card1 = roaring_bitmap_and_cardinality(r1, r2);
@@ -521,7 +521,7 @@ rb_andnot(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 13")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -529,7 +529,7 @@ rb_andnot(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 14")));
     }
 
     r = roaring_bitmap_andnot(r1, r2);
@@ -538,7 +538,7 @@ rb_andnot(PG_FUNCTION_ARGS) {
     if (!r) {
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 15")));
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r);
@@ -568,7 +568,7 @@ rb_andnot_cardinality(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 16")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -576,7 +576,7 @@ rb_andnot_cardinality(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 17")));
     }
 
     card1 = roaring_bitmap_andnot_cardinality(r1, r2);
@@ -605,14 +605,14 @@ rb_xor(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 18")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2), VARSIZE(serializedbytes2) - VARHDRSZ);
     if (!r2) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 19")));
     }
 
     r3 = roaring_bitmap_xor(r1, r2);
@@ -645,7 +645,7 @@ rb_xor_cardinality(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 20")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -653,7 +653,7 @@ rb_xor_cardinality(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 21")));
     }
 
     card1 = roaring_bitmap_xor_cardinality(r1, r2);
@@ -679,7 +679,7 @@ rb_cardinality(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 22")));
 
     card = roaring_bitmap_get_cardinality(r1);
     roaring_bitmap_free(r1);
@@ -703,7 +703,7 @@ rb_is_empty(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 23")));
 
     isempty = roaring_bitmap_is_empty(r1);
     roaring_bitmap_free(r1);
@@ -727,7 +727,7 @@ rb_exsit(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 24")));
 
     isexsit = roaring_bitmap_contains(r1, value);
     roaring_bitmap_free(r1);
@@ -752,7 +752,7 @@ rb_equals(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 25")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -760,7 +760,7 @@ rb_equals(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 26")));
     }
 
     isequal = roaring_bitmap_equals(r1, r2);
@@ -787,7 +787,7 @@ rb_not_equals(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 27")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -795,7 +795,7 @@ rb_not_equals(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 28")));
     }
 
     isequal = roaring_bitmap_equals(r1, r2);
@@ -822,7 +822,7 @@ rb_intersect(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 29")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -830,7 +830,7 @@ rb_intersect(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 30")));
     }
 
     isintersect = roaring_bitmap_intersect(r1, r2);
@@ -857,7 +857,7 @@ rb_contains(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 31")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -865,7 +865,7 @@ rb_contains(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 32")));
     }
 
     iscontain = roaring_bitmap_is_subset(r2, r1);
@@ -892,7 +892,7 @@ rb_containedby(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 33")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -900,7 +900,7 @@ rb_containedby(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 34")));
     }
 
     iscontained = roaring_bitmap_is_subset(r1, r2);
@@ -927,7 +927,7 @@ rb_jaccard_dist(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 35")));
 
     r2 = roaring_bitmap_frozen_view(VARDATA(serializedbytes2),
                                VARSIZE(serializedbytes2) - VARHDRSZ);
@@ -935,7 +935,7 @@ rb_jaccard_dist(PG_FUNCTION_ARGS) {
         roaring_bitmap_free(r1);
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 36")));
     }
 
     jaccard_dist = roaring_bitmap_jaccard_index(r1, r2);
@@ -962,7 +962,7 @@ rb_add(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 37")));
 
     r2 = roaring_bitmap_copy(r1);
     roaring_bitmap_free(r1);
@@ -994,7 +994,7 @@ rb_remove(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 38")));
 
     r2 = roaring_bitmap_copy(r1);
     roaring_bitmap_free(r1);
@@ -1024,7 +1024,7 @@ rb_min(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 39")));
 
     if(roaring_bitmap_is_empty(r1))
     {
@@ -1054,7 +1054,7 @@ rb_max(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 40")));
 
     if(roaring_bitmap_is_empty(r1))
     {
@@ -1084,7 +1084,7 @@ rb_rank(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 41")));
 
     rank = roaring_bitmap_rank(r1, value);
     roaring_bitmap_free(r1);
@@ -1110,7 +1110,7 @@ rb_index(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 42")));
 
     isexsit = roaring_bitmap_contains(r1, value);
 
@@ -1153,7 +1153,7 @@ rb_fill(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 43")));
 
     if (rangestart < rangeend) {
         r2 = roaring_bitmap_from_range(rangestart, rangeend, 1);
@@ -1206,7 +1206,7 @@ rb_clear(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 44")));
 
     if (rangestart < rangeend) {
         r2 = roaring_bitmap_from_range(rangestart, rangeend, 1);
@@ -1259,7 +1259,7 @@ rb_flip(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 45")));
 
     if (rangestart < rangeend) {
         r2 = roaring_bitmap_flip(r1, rangestart, rangeend);
@@ -1296,7 +1296,7 @@ rb_shiftright(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 46")));
 
     if(distance != 0)
     {
@@ -1367,7 +1367,7 @@ rb_range(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 47")));
 
     r2 = roaring_bitmap_create();
     if (!r2) {
@@ -1421,7 +1421,7 @@ rb_range_cardinality(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 48")));
 
     card1 = 0;
     roaring_init_iterator(r1, &iterator);
@@ -1469,7 +1469,7 @@ rb_select(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 49")));
 
     r2 = roaring_bitmap_create();
     if (!r2) {
@@ -1586,7 +1586,7 @@ rb_to_array(PG_FUNCTION_ARGS)
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                 errmsg("bitmap format is error")));
+                 errmsg("bitmap format is error 50")));
 
     card1 = roaring_bitmap_get_cardinality(r1);
 
@@ -1638,7 +1638,7 @@ rb_iterate(PG_FUNCTION_ARGS) {
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                     errmsg("bitmap format is error")));
+                     errmsg("bitmap format is error 51")));
 
         fctx = roaring_create_iterator(r1);
 
@@ -2026,7 +2026,7 @@ rb_deserialize(PG_FUNCTION_ARGS) {
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                     errmsg("bitmap format is error")));
+                     errmsg("bitmap format is error 52")));
         // PostgreSQL's combine_aggregates() only init fcinfo->isnull once,
         // set fcinfo->isnull here to avoid bug https://github.com/ChenHuajun/pg_roaringbitmap/issues/6
         fcinfo->isnull = false;
@@ -2077,7 +2077,7 @@ rb_runoptimize(PG_FUNCTION_ARGS) {
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
-                        errmsg("bitmap format is error")));
+                        errmsg("bitmap format is error 53")));
 
     r2 = roaring_bitmap_copy(r1);
     roaring_bitmap_free(r1);
