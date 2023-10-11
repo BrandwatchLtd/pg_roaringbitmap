@@ -391,7 +391,6 @@ rb_or_cardinality(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     uint64 card1;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -476,7 +475,6 @@ rb_and_cardinality(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     uint64 card1;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -562,7 +560,6 @@ rb_andnot_cardinality(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     uint64 card1;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -638,7 +635,6 @@ rb_xor_cardinality(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     uint64 card1;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -721,7 +717,6 @@ rb_exsit(PG_FUNCTION_ARGS) {
     uint32 value = PG_GETARG_UINT32(1);
     const roaring_bitmap_t *r1;
     bool isexsit;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
@@ -747,7 +742,6 @@ rb_equals(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     bool isequal;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -783,7 +777,6 @@ rb_not_equals(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     bool isequal;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -819,7 +812,6 @@ rb_intersect(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     bool isintersect;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -855,7 +847,6 @@ rb_contains(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     bool iscontain;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -891,7 +882,6 @@ rb_containedby(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     bool iscontained;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -927,7 +917,6 @@ rb_jaccard_dist(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     const roaring_bitmap_t *r2;
     double jaccard_dist;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes1),
                                VARSIZE(serializedbytes1));
@@ -1017,7 +1006,6 @@ rb_min(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
     const roaring_bitmap_t *r1;
     uint32 min;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
@@ -1048,7 +1036,6 @@ rb_max(PG_FUNCTION_ARGS) {
     bytea *data = PG_GETARG_BYTEA_P(0);
     const roaring_bitmap_t *r1;
     uint32 max;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
@@ -1079,7 +1066,6 @@ rb_rank(PG_FUNCTION_ARGS) {
     uint32 value = PG_GETARG_UINT32(1);
     const roaring_bitmap_t *r1;
     uint64 rank;
-    bool ret;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
@@ -1105,7 +1091,7 @@ rb_index(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     uint64 rank;
     int64 result;
-    bool ret,isexsit;
+    bool isexsit;
 
     r1 = roaring_bitmap_frozen_view(VARDATA(data),
                                VARSIZE(data));
