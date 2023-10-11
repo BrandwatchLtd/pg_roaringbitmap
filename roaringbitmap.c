@@ -172,11 +172,13 @@ roaringbitmap_in(PG_FUNCTION_ARGS) {
         dd = DirectFunctionCall1(byteain, PG_GETARG_DATUM(0));
 
         serializedbytes = DatumGetByteaP(dd);
-        r1 = roaring_bitmap_portable_deserialize(VARDATA(serializedbytes));
+        r1 = (roaring_bitmap_t *)roaring_bitmap_frozen_view(VARDATA(serializedbytes), VARSIZE(serializedbytes) - VARHDRSZ);
         if (!r1)
             ereport(ERROR,
                     (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                      errmsg("bitmap format is error 2")));
+        roaring_bitmap_free(r1);
+        PG_RETURN_BYTEA_P(serializedbytes);
     } else {
         /* int array input */
 
@@ -280,21 +282,16 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
     const roaring_bitmap_t *r1;
     size_t expectedsize;
 
+    if(rbitmap_output_format == RBITMAP_OUTPUT_BYTEA){
+        return DirectFunctionCall1(byteaout, PG_GETARG_DATUM(0));
+    }
+
     serializedbytes = PG_GETARG_BYTEA_P(0);
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes), VARSIZE(serializedbytes) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
                 (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
                  errmsg("bitmap format is error 3")));
-
-    if(rbitmap_output_format == RBITMAP_OUTPUT_BYTEA){
-        expectedsize = roaring_bitmap_portable_size_in_bytes(r1);
-        serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
-        roaring_bitmap_portable_serialize(r1, VARDATA(serializedbytes));
-        roaring_bitmap_free(r1);
-        SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
-        return DirectFunctionCall1(byteaout, PointerGetDatum(serializedbytes));
-    }
 
     initStringInfo(&buf);
 
