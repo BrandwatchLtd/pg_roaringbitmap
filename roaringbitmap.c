@@ -286,6 +286,10 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
     }
 
     serializedbytes = PG_GETARG_BYTEA_P(0);
+    if((uintptr_t)serializedbytes % 32 != 0)
+        ereport(ERROR,
+                (errcode(ERRCODE_NULL_VALUE_NOT_ALLOWED),
+                        errmsg("you're about to have trouble with 32 byte required alignment")));
     r1 = roaring_bitmap_frozen_view(VARDATA(serializedbytes), VARSIZE(serializedbytes) - VARHDRSZ);
     if (!r1)
         ereport(ERROR,
