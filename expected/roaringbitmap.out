@@ -140,21 +140,21 @@ LINE 1: select  '{2147483648}'::roaringbitmap;
                 ^
 -- Test Type cast
 select '{}'::roaringbitmap::bytea;
-    bytea
---------------
- \x0100000000
+   bytea
+------------
+ \xc6350000
 (1 row)
 
 select '{1}'::roaringbitmap::bytea;
-        bytea
-----------------------
- \x010100000001000000
+          bytea
+--------------------------
+ \x01000000000002c6b50000
 (1 row)
 
 select '{1,9999}'::roaringbitmap::bytea;
             bytea
 ------------------------------
- \x0102000000010000000f270000
+ \x01000f270000010002c6b50000
 (1 row)
 
 select '{}'::roaringbitmap::bytea::roaringbitmap;
