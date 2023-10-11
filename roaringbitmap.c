@@ -280,7 +280,6 @@ roaringbitmap_out(PG_FUNCTION_ARGS) {
     roaring_uint32_iterator_t iterator;
     StringInfoData buf;
     const roaring_bitmap_t *r1;
-    size_t expectedsize;
 
     if(rbitmap_output_format == RBITMAP_OUTPUT_BYTEA){
         return DirectFunctionCall1(byteaout, PG_GETARG_DATUM(0));
