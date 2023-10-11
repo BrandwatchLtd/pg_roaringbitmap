@@ -260,7 +260,7 @@ roaringbitmap_in(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r1);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
@@ -373,7 +373,7 @@ rb_or(PG_FUNCTION_ARGS) {
     roaring_bitmap_free(r1);
     roaring_bitmap_free(r2);
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r3);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r3, VARDATA(serializedbytes));
     roaring_bitmap_free(r3);
 
@@ -457,7 +457,7 @@ rb_and(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r, VARDATA(serializedbytes));
     roaring_bitmap_free(r);
 
@@ -542,7 +542,7 @@ rb_andnot(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r, VARDATA(serializedbytes));
     roaring_bitmap_free(r);
 
@@ -619,7 +619,7 @@ rb_xor(PG_FUNCTION_ARGS) {
     roaring_bitmap_free(r1);
     roaring_bitmap_free(r2);
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r3);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r3, VARDATA(serializedbytes));
     roaring_bitmap_free(r3);
 
@@ -969,7 +969,7 @@ rb_add(PG_FUNCTION_ARGS) {
     roaring_bitmap_add(r2, value);
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r2);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r2);
 
@@ -1001,7 +1001,7 @@ rb_remove(PG_FUNCTION_ARGS) {
     roaring_bitmap_remove(r2, value);
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r2);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r2);
 
@@ -1171,7 +1171,7 @@ rb_fill(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r3);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r3, VARDATA(serializedbytes));
     roaring_bitmap_free(r3);
 
@@ -1225,7 +1225,7 @@ rb_clear(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r3);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r3, VARDATA(serializedbytes));
     roaring_bitmap_free(r3);
 
@@ -1269,7 +1269,7 @@ rb_flip(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r2);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r2);
 
@@ -1332,7 +1332,7 @@ rb_shiftright(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r1);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
@@ -1387,7 +1387,7 @@ rb_range(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r2);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
     roaring_bitmap_free(r2);
@@ -1524,7 +1524,7 @@ rb_select(PG_FUNCTION_ARGS) {
     }
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r2);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r2, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
     roaring_bitmap_free(r2);
@@ -1559,7 +1559,7 @@ rb_build(PG_FUNCTION_ARGS) {
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r1);
 
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r1, VARDATA(serializedbytes));
     roaring_bitmap_free(r1);
 
@@ -1993,7 +1993,7 @@ rb_serialize(PG_FUNCTION_ARGS) {
         r1 = (roaring_bitmap_t *) PG_GETARG_POINTER(0);
 
         expectedsize = roaring_bitmap_frozen_size_in_bytes(r1);
-        serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+        serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
         roaring_bitmap_frozen_serialize(r1, VARDATA(serializedbytes));
 
         SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
@@ -2084,7 +2084,7 @@ rb_runoptimize(PG_FUNCTION_ARGS) {
     roaring_bitmap_run_optimize(r2);
 
     expectedsize = roaring_bitmap_frozen_size_in_bytes(r2);
-    serializedbytes = (bytea *) palloc(VARHDRSZ + expectedsize);
+    serializedbytes = (bytea *) pg_aligned_malloc(32, VARHDRSZ + expectedsize);
     roaring_bitmap_frozen_serialize(r2, VARDATA(serializedbytes));
 
     roaring_bitmap_free(r2);
