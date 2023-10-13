@@ -1,0 +1,17 @@
+Source: pg_roaringbitmap
+Section: database
+Priority: optional
+Maintainer: Shane Michael Mathews <smathews@brandwatch.com>
+Build-Depends: debhelper (>= 9), postgresql-server-dev-all (>= 180)
+Standards-Version: 3.9.8
+Homepage: https://github.com/BrandwatchLtd/pg_roaringbitmap
+Vcs-Git: git@github.com:BrandwatchLtd/pg_roaringbitmap.git
+Vcs-Browser: https://github.com/BrandwatchLtd/pg_roaringbitmap
+
+Package: postgresql-roaringbitmap-PGVERSION
+Architecture: any
+Depends: postgresql-PGVERSION, ${shlibs:Depends}, ${misc:Depends}
+Description: Roaring bitmaps extension for PostgreSQL.
+ Compressed bitmaps for increased bitmap performance.
+ .
+ This package contains the server extension for PostgreSQL PGVERSION.
