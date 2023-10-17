@@ -1,7 +1,7 @@
 Source: pg_roaringbitmap
 Section: database
 Priority: optional
-Maintainer: Shane Michael Mathews <smathews@brandwatch.com>
+Maintainer: Aidan McMurray <amcmurray@brandwatch.com>
 Build-Depends: debhelper (>= 9), postgresql-server-dev-all (>= 180)
 Standards-Version: 3.9.8
 Homepage: https://github.com/BrandwatchLtd/pg_roaringbitmap
