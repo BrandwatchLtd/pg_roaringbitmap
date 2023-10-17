@@ -1,4 +1,4 @@
-Source: pg_roaringbitmap
+Source: roaringbitmap
 Section: database
 Priority: optional
 Maintainer: Aidan McMurray <amcmurray@brandwatch.com>
