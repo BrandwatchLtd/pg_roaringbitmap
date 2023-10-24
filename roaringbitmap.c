@@ -5,6 +5,8 @@
 #define MAX_BITMAP_RANGE_END UINT64_C(0x100000000)
 #define INT4_MIN -2147483648
 #define INT4_MAX 2147483647
+// TODO: create custom id and reserve at https://wiki.postgresql.org/wiki/CustomWALResourceManagers
+#define ROARING_RMGR_ID RM_EXPERIMENTAL_ID
 
 /* GUC variables */
 
@@ -23,6 +25,7 @@ static const struct config_enum_entry output_format_options[] =
 
 static int	rbitmap_output_format;		/* output format */
 
+// Memory API
 void *		pg_aligned_malloc(size_t alignment, size_t size);
 void		pg_aligned_free(void *memblock);
 void*		pg_realloc(void* p, size_t new_sz);
@@ -37,6 +40,18 @@ static roaring_memory_t pg_global_memory_hook = {
         .free = pg_free,
         .aligned_malloc = pg_aligned_malloc,
         .aligned_free = pg_aligned_free,
+};
+
+// RMGR API
+void		pg_rmgr_redo(XLogReaderState *record);
+void		pg_rmgr_desc(StringInfo buf, XLogReaderState *record);
+const char *pg_rmgr_identify(uint8 info);
+
+static const RmgrData pg_rmgr = {
+        .rm_name = "roaring_bitmap",
+        .rm_redo = pg_rmgr_redo,
+        .rm_desc = pg_rmgr_desc,
+        .rm_identify = pg_rmgr_identify
 };
 
 /*
@@ -57,6 +72,7 @@ _PG_init(void)
 							 NULL,
 							 NULL,
 							 NULL);
+    RegisterCustomRmgr(ROARING_RMGR_ID, (RmgrData*)&pg_rmgr);
     roaring_init_memory_hook(pg_global_memory_hook);
 }
 
@@ -2131,4 +2147,77 @@ rb_runoptimize(PG_FUNCTION_ARGS) {
     roaring_bitmap_free(r);
     SET_VARSIZE(serializedbytes, VARHDRSZ + expectedsize);
     PG_RETURN_BYTEA_P(serializedbytes);
+}
+
+#define XLOG_ADD        0x00
+#define XLOG_REMOVE     0x01
+#define XLOG_REPLACE    0x02
+
+void
+pg_rmgr_redo(XLogReaderState *record) {
+    uint8 action = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+    char *record_bitmap_data = XLogRecGetData(record);
+    roaring_bitmap_t *existing_table_bitmap;
+    roaring_bitmap_t *new_table_bitmap;
+    roaring_bitmap_t *record_bitmap = roaring_bitmap_portable_deserialize(record_bitmap_data);
+
+    // TODO: open table
+    switch (action) {
+        case XLOG_ADD:
+            // TODO: extract existing bitmap from table
+            new_table_bitmap = roaring_bitmap_or(existing_table_bitmap, record_bitmap);
+            roaring_bitmap_free(existing_table_bitmap);
+            break;
+        case XLOG_REMOVE:
+            // TODO: extract existing bitmap from table
+            new_table_bitmap = roaring_bitmap_andnot(existing_table_bitmap, record_bitmap);
+            roaring_bitmap_free(existing_table_bitmap);
+            break;
+        case XLOG_REPLACE:
+            // TODO: replace the table bitmap with the record bitmap
+            break;
+        default:
+            elog(PANIC, "pg_rmgr_redo: unknown action code %u", action);
+    }
+    // TODO: swap table's bitmap with record_bitmap
+    roaring_bitmap_free(new_table_bitmap);
+    roaring_bitmap_free(record_bitmap);
+    // TODO: close table
+}
+
+void
+pg_rmgr_desc(StringInfo buf, XLogReaderState *record) {
+    uint8 action = XLogRecGetInfo(record) & ~XLR_INFO_MASK;
+    char *record_bitmap_data = XLogRecGetData(record);
+    roaring_bitmap_t *record_bitmap = roaring_bitmap_portable_deserialize(record_bitmap_data);
+    uint64 card = roaring_bitmap_get_cardinality(record_bitmap);
+
+    switch (action) {
+        case XLOG_ADD:
+            appendStringInfo(buf, "add to bitmap");
+            break;
+        case XLOG_REMOVE:
+            appendStringInfo(buf, "remove from bitmap");
+            break;
+        case XLOG_REPLACE:
+            appendStringInfo(buf, "replace bitmap");
+            break;
+        default:
+            return;
+    }
+
+    appendStringInfo(buf, "recorded bitmap with %zu elements", card);
+}
+
+const char *
+pg_rmgr_identify(uint8 info) {
+    uint8 action = info & ~XLR_INFO_MASK;
+    switch (action) {
+        case XLOG_ADD:
+        case XLOG_REMOVE:
+        case XLOG_REPLACE:
+            return "XLOG_ROARING_RMGR";
+        default:
+            return NULL;
+    }
 }
