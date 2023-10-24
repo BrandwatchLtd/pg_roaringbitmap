@@ -21,6 +21,8 @@
 #include "lib/stringinfo.h"
 #include "funcapi.h"
 #include "libpq/pqformat.h"
+#include "access/xlog_internal.h"
+#include "access/table.h"
 
 /* must include "roaring.h" before redefine malloc functions */
 #include "roaring.h"
